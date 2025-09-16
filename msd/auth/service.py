@@ -18,32 +18,30 @@ class WebUser(UserMixin):
 
 def find_user_by_username(username):
     """Find user by username."""
-    conn = get_conn()
-    cur = conn.cursor()
-    cur.execute("""
-        SELECT wu.id, wu.username, wu.role, wu.password_hash, wu.department_id, d.name as dept_name
-        FROM web_users wu 
-        LEFT JOIN departments d ON wu.department_id = d.id 
-        WHERE wu.username = ?
-    """, (username,))
-    result = cur.fetchone()
-    conn.close()
-    return result
+    with get_conn() as conn:
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT wu.id, wu.username, wu.role, wu.password_hash, wu.department_id, d.name as dept_name
+            FROM web_users wu 
+            LEFT JOIN departments d ON wu.department_id = d.id 
+            WHERE wu.username = ?
+        """, (username,))
+        result = cur.fetchone()
+        return result
 
 
 def load_user_by_id(user_id):
     """Load user by ID for Flask-Login."""
-    conn = get_conn()
-    cur = conn.cursor()
-    cur.execute("""
-        SELECT wu.id, wu.username, wu.role, wu.department_id, d.name as dept_name
-        FROM web_users wu 
-        LEFT JOIN departments d ON wu.department_id = d.id 
-        WHERE wu.id = ?
-    """, (user_id,))
-    result = cur.fetchone()
-    conn.close()
-    if not result:
-        return None
-    return WebUser(result["id"], result["username"], result["role"], 
-                  result["department_id"], result["dept_name"])
+    with get_conn() as conn:
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT wu.id, wu.username, wu.role, wu.department_id, d.name as dept_name
+            FROM web_users wu 
+            LEFT JOIN departments d ON wu.department_id = d.id 
+            WHERE wu.id = ?
+        """, (user_id,))
+        result = cur.fetchone()
+        if not result:
+            return None
+        return WebUser(result["id"], result["username"], result["role"], 
+                      result["department_id"], result["dept_name"])

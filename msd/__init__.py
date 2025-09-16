@@ -21,6 +21,10 @@ def create_app(config_class="config.Config"):
 
     # تهيئة تسجيل الدخول
     login_manager.init_app(app)
+    
+    # Register user loader - import from the standalone auth.py file
+    from . import auth
+    login_manager.user_loader(auth.load_user)
 
     # تهيئة قاعدة البيانات/المخطط
     try:
