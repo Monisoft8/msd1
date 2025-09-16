@@ -1,3 +1,4 @@
+ignore name=.gitignore
 # Python
 __pycache__/
 *.py[cod]
@@ -19,7 +20,7 @@ build/
 develop-eggs/
 dist/
 downloads/
-eggs/
+egos/
 .eggs/
 lib/
 lib64/
