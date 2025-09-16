@@ -165,8 +165,8 @@ def _process_employee_row(
             return {'error': f'الرقم الوطني غير صالح: {national_id_raw}', 'data': None}
         
         # Extract other fields
-        serial_number = safe_extract_value(row, column_mapping.get('serial_number', ''), '').strip()
-        job_grade = safe_extract_value(row, column_mapping.get('job_grade', ''), '').strip()
+        serial_number = str(safe_extract_value(row, column_mapping.get('serial_number', ''), '')).strip()
+        job_grade = str(safe_extract_value(row, column_mapping.get('job_grade', ''), '')).strip()
         
         # Process dates
         hiring_date = normalize_date(safe_extract_value(row, column_mapping.get('hiring_date', ''), ''))
@@ -180,11 +180,11 @@ def _process_employee_row(
         )
         
         # Process work pattern
-        work_pattern = safe_extract_value(row, column_mapping.get('work_days', ''), '').strip()
+        work_pattern = str(safe_extract_value(row, column_mapping.get('work_days', ''), '')).strip()
         
         # Handle department
         department_id = None
-        department_name = safe_extract_value(row, column_mapping.get('department', ''), '').strip()
+        department_name = str(safe_extract_value(row, column_mapping.get('department', ''), '')).strip()
         if department_name:
             if create_departments:
                 department_id = get_or_create_department(department_name)
@@ -208,7 +208,7 @@ def _process_employee_row(
             'grade_date': grade_date,
             'bonus': bonus,
             'vacation_balance': vacation_balance,
-            'work_pattern': work_pattern
+            'work_days': work_pattern  # Note: using work_days to match database schema
         }
         
         return {'error': None, 'data': employee_data}
@@ -234,7 +234,7 @@ def _update_existing_employee(existing_employee, new_data: Dict[str, Any], curso
     cursor.execute("""
         UPDATE employees 
         SET serial_number=?, name=?, national_id=?, department_id=?, job_grade=?, 
-            hiring_date=?, grade_date=?, bonus=?, vacation_balance=?, work_pattern=?,
+            hiring_date=?, grade_date=?, bonus=?, vacation_balance=?, work_days=?,
             initial_vacation_balance=COALESCE(?, initial_vacation_balance),
             updated_at=CURRENT_TIMESTAMP
         WHERE id=?
@@ -248,7 +248,7 @@ def _update_existing_employee(existing_employee, new_data: Dict[str, Any], curso
         update_data['grade_date'],
         update_data['bonus'],
         update_data['vacation_balance'],
-        update_data['work_pattern'],
+        update_data['work_days'],
         update_data.get('initial_vacation_balance'),
         existing_employee['id']
     ))
@@ -263,7 +263,7 @@ def _insert_new_employee(employee_data: Dict[str, Any], cursor):
     
     cursor.execute("""
         INSERT INTO employees (serial_number, name, national_id, department_id, job_grade, 
-                             hiring_date, grade_date, bonus, vacation_balance, initial_vacation_balance, work_pattern)
+                             hiring_date, grade_date, bonus, vacation_balance, initial_vacation_balance, work_days)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         employee_data['serial_number'],
@@ -276,5 +276,5 @@ def _insert_new_employee(employee_data: Dict[str, Any], cursor):
         employee_data['bonus'],
         employee_data['vacation_balance'],
         employee_data['initial_vacation_balance'],
-        employee_data['work_pattern']
+        employee_data['work_days']
     ))

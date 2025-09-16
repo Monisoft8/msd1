@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h1><i class="fas fa-calendar-alt"></i> إدارة الإجازات</h1>
+        <button class="btn btn-primary" onclick="showAddVacationModal()">
+            <i class="fas fa-plus"></i>
+            طلب إجازة جديدة
+        </button>
+    </div>
+
+    <div class="filters-section">
+        <div class="filter-group">
+            <select id="statusFilter" class="filter-select">
+                <option value="">جميع الحالات</option>
+                <option value="تحت الإجراء">تحت الإجراء</option>
+                <option value="موافق">موافق</option>
+                <option value="مرفوض">مرفوض</option>
+                <option value="ملغاة">ملغاة</option>
+            </select>
+            <select id="typeFilter" class="filter-select">
+                <option value="">جميع الأنواع</option>
+                <option value="سنوية">سنوية</option>
+                <option value="طارئة">طارئة</option>
+                <option value="وفاة">وفاة</option>
+                <option value="حج">حج</option>
+                <option value="زواج">زواج</option>
+                <option value="وضع">وضع</option>
+                <option value="مرضية">مرضية</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <div class="table-responsive">
+            <table class="data-table" id="vacationsTable">
+                <thead>
+                    <tr>
+                        <th>الموظف</th>
+                        <th>نوع الإجازة</th>
+                        <th>من</th>
+                        <th>إلى</th>
+                        <th>المدة</th>
+                        <th>الحالة</th>
+                        <th>موافقة رئيس القسم</th>
+                        <th>تاريخ الطلب</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for vacation in vacations %}
+                    <tr data-vacation-id="{{ vacation.id }}">
+                        <td>{{ vacation.employee_name }}</td>
+                        <td>{{ vacation.type }}</td>
+                        <td>{{ vacation.start_date }}</td>
+                        <td>{{ vacation.end_date }}</td>
+                        <td>{{ vacation.duration }} أيام</td>
+                        <td>
+                            <span class="status status-{{ vacation.status|replace(' ', '-')|lower }}">
+                                {{ vacation.status }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="status status-{{ vacation.dept_approval|replace(' ', '-')|lower }}">
+                                {{ vacation.dept_approval }}
+                            </span>
+                        </td>
+                        <td>{{ vacation.created_at[:10] }}</td>
+                        <td>
+                            <div class="action-buttons">
+                                {% if vacation.status == 'تحت الإجراء' %}
+                                <button class="btn btn-sm btn-success" onclick="approveVacation({{ vacation.id }})">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="rejectVacation({{ vacation.id }})">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                {% endif %}
+                                <button class="btn btn-sm btn-info" onclick="viewVacationDetails({{ vacation.id }})">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- نموذج طلب إجازة -->
+    <div id="vacationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>طلب إجازة جديدة</h3>
+                <span class="close" onclick="closeVacationModal()">&times;</span>
+            </div>
+            <form id="vacationForm" class="modal-form">
+                <div class="form-group">
+                    <label>الموظف</label>
+                    <select name="employee_id" required>
+                        <option value="">اختر الموظف</option>
+                        <!-- سيتم ملؤها بالجافاسكربت -->
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>نوع الإجازة</label>
+                    <select name="type" id="vacationType" required onchange="handleVacationTypeChange()">
+                        <option value="">اختر نوع الإجازة</option>
+                        <option value="سنوية">سنوية</option>
+                        <option value="طارئة">طارئة</option>
+                        <option value="وفاة">وفاة</option>
+                        <option value="حج">حج</option>
+                        <option value="زواج">زواج</option>
+                        <option value="وضع">وضع</option>
+                        <option value="مرضية">مرضية</option>
+                    </select>
+                </div>
+
+                <div id="deathTypeSection" class="form-group" style="display: none;">
+                    <label>نوع الوفاة</label>
+
+
+<style>
+.status-تحت-الإجراء {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-موافق {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-مرفوض {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.status-ملغاة {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-family: inherit;
+    resize: vertical;
+}
+</style>
+{% endblock %}  <!-- تأكد من وجود هذه العلامة مرة واحدة فقط في النهاية -->

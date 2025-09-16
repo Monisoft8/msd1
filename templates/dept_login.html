@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <i class="fas fa-user-tie"></i>
+            <h2>تسجيل دخول رئيس القسم</h2>
+        </div>
+        
+        <form method="POST" class="login-form">
+            <div class="form-group">
+                <label for="username">
+                    <i class="fas fa-user"></i>
+                    اسم المستخدم
+                </label>
+                <input type="text" id="username" name="username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">
+                    <i class="fas fa-key"></i>
+                    كلمة المرور
+                </label>
+                <input type="password" id="password" name="password" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-sign-in-alt"></i>
+                دخول
+            </button>
+        </form>
+
+        <div class="login-footer">
+            <p>المجمع الصحي ميزران - نظام رؤساء الأقسام</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

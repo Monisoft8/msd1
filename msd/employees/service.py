@@ -51,7 +51,7 @@ def create_employee(employee_data):
     try:
         cur.execute("""
             INSERT INTO employees (serial_number, name, national_id, department_id, job_grade, 
-                                 hiring_date, grade_date, bonus, vacation_balance, work_pattern)
+                                 hiring_date, grade_date, bonus, vacation_balance, work_days)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             employee_data.get('serial_number'),
@@ -63,7 +63,7 @@ def create_employee(employee_data):
             employee_data.get('grade_date'),
             employee_data.get('bonus', 0),
             employee_data.get('vacation_balance', 30),
-            employee_data.get('work_pattern')
+            employee_data.get('work_days')
         ))
         
         employee_id = cur.lastrowid
@@ -95,7 +95,7 @@ def update_employee(employee_id, employee_data):
         cur.execute("""
             UPDATE employees 
             SET serial_number=?, name=?, national_id=?, department_id=?, job_grade=?, 
-                hiring_date=?, grade_date=?, bonus=?, vacation_balance=?, work_pattern=?,
+                hiring_date=?, grade_date=?, bonus=?, vacation_balance=?, work_days=?,
                 updated_at=CURRENT_TIMESTAMP
             WHERE id=?
         """, (
@@ -108,7 +108,7 @@ def update_employee(employee_id, employee_data):
             employee_data.get('grade_date'),
             employee_data.get('bonus', 0),
             employee_data.get('vacation_balance', 30),
-            employee_data.get('work_pattern'),
+            employee_data.get('work_days'),
             employee_id
         ))
         
