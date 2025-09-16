@@ -1,59 +1,68 @@
-"""Application factory for the Employee Management System."""
-import logging
 from flask import Flask, redirect, url_for
-from msd.extensions import login_manager
-from msd.auth.service import load_user_by_id
-from msd.auth.routes import auth_bp
-from msd.database.schema_init import init_database
-from msd.vacations.accrual_service import run_monthly_accrual
-from msd.vacations.emergency_reset_service import run_emergency_reset
-
-logger = logging.getLogger(__name__)
-
+from .extensions import login_manager
 
 def create_app(config_class="config.Config"):
-    """Create and configure the Flask application."""
-    # Create Flask app with templates in the root directory
-    app = Flask(__name__, template_folder="../")
-    
-    # Load configuration
-    app.config.from_object(config_class)
-    
-    # Initialize extensions
+    app = Flask(__name__)
+
+    # تحميل الإعدادات
+    try:
+        if isinstance(config_class, str):
+            if "." in config_class:
+                module, _, cls = config_class.rpartition(".")
+                mod = __import__(module, fromlist=[cls])
+                app.config.from_object(getattr(mod, cls))
+            else:
+                import config as cfg
+                app.config.from_object(getattr(cfg, config_class, cfg.Config))
+        else:
+            app.config.from_object(config_class)
+    except Exception as e:
+        app.logger.warning(f"Config load warning: {e}")
+
+    # تهيئة تسجيل الدخول
     login_manager.init_app(app)
-    
-    # Set up user loader for Flask-Login
-    @login_manager.user_loader
-    def load_user(user_id):
-        return load_user_by_id(user_id)
-    
-    # Register blueprints
-    app.register_blueprint(auth_bp)
-    
-    # Add root route that redirects to login
-    @app.route("/")
-    def index():
-        return redirect(url_for("auth.login"))
-    
-    # Initialize database and run services
-    with app.app_context():
-        try:
-            # Initialize database schema
+
+    # تهيئة قاعدة البيانات/المخطط
+    try:
+        from .database.schema_init import init_database
+        with app.app_context():
             init_database()
-            
-            # Run vacation services (idempotent)
+    except Exception as e:
+        app.logger.warning(f"Database init skipped/failed: {e}")
+
+    # تسجيل Blueprints
+    try:
+        from .auth.routes import auth_bp
+        app.register_blueprint(auth_bp)
+    except Exception as e:
+        app.logger.warning(f"Auth blueprint not registered: {e}")
+
+    try:
+        from .employees.routes import employees_bp
+        app.register_blueprint(employees_bp)
+    except Exception:
+        # إن لم تكن وحدة الموظفين متاحة بعد، لا نوقف التطبيق
+        pass
+
+    # خدمات تلقائية (تراكم/إعادة ضبط) — غير معطِّلة للتشغيل
+    try:
+        from .vacations.accrual_service import run_monthly_accrual
+        from .vacations.emergency_reset_service import run_annual_reset
+        with app.app_context():
             try:
                 run_monthly_accrual()
             except Exception as e:
-                logger.warning(f"Monthly accrual service error: {e}")
-            
+                app.logger.info(f"Accrual service skipped: {e}")
             try:
-                run_emergency_reset()
+                run_annual_reset()
             except Exception as e:
-                logger.warning(f"Emergency reset service error: {e}")
-                
-        except Exception as e:
-            logger.error(f"Error during application initialization: {e}")
-            # Don't fail the app start, but log the error
-    
+                app.logger.info(f"Emergency reset skipped: {e}")
+    except Exception:
+        # الخدمات اختيارية
+        pass
+
+    @app.route("/")
+    def index():
+        return redirect(url_for("auth.login"))
+
     return app
