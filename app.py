@@ -987,12 +987,17 @@ def import_employees():
 
 
 # ------------------------
-# Initialization
+# Initialization (Fixed for newer Flask versions)
 # ------------------------
-@app.before_first_request
-def initialize():
-    # تهيئة الجداول عند أول طلب
+def initialize_database():
+    """Initialize database - called from app context"""
     init_database()
+
+# Initialize database on app startup (only if new)
+DB_PATH = os.path.join(os.path.dirname(__file__), "employees.db")
+if not os.path.exists(DB_PATH):
+    with app.app_context():
+        initialize_database()
 
 
 # ------------------------
