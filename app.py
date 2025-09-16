@@ -1004,10 +1004,5 @@ if not os.path.exists(DB_PATH):
 # تشغيل التطبيق
 # ------------------------
 if __name__ == "__main__":
-    # تهيئة قاعدة البيانات إن لم تكن موجودة
-    if not os.path.exists(DB_PATH):
-        init_database()
-    else:
-        # التأكد من تحديث البنية عند تشغيل التطبيق (آمن لوجود فهارس أو أعمدة جديدة)
-        init_database()
+    # يمكنك تغيير debug/host/port حسب حاجتك
     app.run(host="0.0.0.0", port=5000, debug=True)
