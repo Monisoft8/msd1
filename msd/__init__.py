@@ -3,11 +3,13 @@ from flask import Flask, redirect, url_for
 from .extensions import login_manager
 
 def create_app(config_class="config.Config"):
-    # Get the parent directory of msd (where templates and static folders are located)
+    # Get the parent directory of msd (where templates folder is located)
     parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    # Use msd/static as the static folder as per requirements
+    static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
     app = Flask(__name__, 
                 template_folder=os.path.join(parent_dir, 'templates'),
-                static_folder=os.path.join(parent_dir, 'static'))
+                static_folder=static_dir)
 
     # تحميل الإعدادات
     try:

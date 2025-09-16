@@ -25,7 +25,7 @@ def login():
             <p>مرحباً {user.username}</p>
             <p>الدور: {user.role}</p>
             <p>القسم: {user.dept_name or 'غير محدد'}</p>
-            <a href="/logout">تسجيل الخروج</a>
+            <a href="{{ url_for('auth.logout') }}">تسجيل الخروج</a>
             """
         flash("اسم المستخدم أو كلمة المرور غير صحيحة", "danger")
 

@@ -26,7 +26,7 @@
                             رئيس قسم {{ current_user.dept_name }}
                         {% endif %}
                     </span>
-                    <a href="{{ url_for('logout') }}" class="nav-link">
+                    <a href="{{ url_for('auth.logout') }}" class="nav-link">
                         <i class="fas fa-sign-out-alt"></i>
                         تسجيل الخروج
                     </a>
