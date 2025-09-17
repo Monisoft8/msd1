@@ -20,12 +20,13 @@ def login():
                           user_row["department_id"], user_row["dept_name"])
             login_user(user)
             # For now, redirect to a simple success page since other routes aren't moved yet
+            logout_url = url_for('auth.logout')
             return f"""
             <h1>تم تسجيل الدخول بنجاح!</h1>
             <p>مرحباً {user.username}</p>
             <p>الدور: {user.role}</p>
             <p>القسم: {user.dept_name or 'غير محدد'}</p>
-            <a href="/logout">تسجيل الخروج</a>
+            <a href="{logout_url}">تسجيل الخروج</a>
             """
         flash("اسم المستخدم أو كلمة المرور غير صحيحة", "danger")
 

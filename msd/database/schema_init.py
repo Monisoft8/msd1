@@ -9,8 +9,8 @@ logger = logging.getLogger(__name__)
 
 def init_database():
     """Initialize database with new comprehensive schema (idempotent)."""
-    conn = get_conn()
-    cur = conn.cursor()
+    with get_conn() as conn:
+        cur = conn.cursor()
     
     # Enable foreign keys
     cur.execute("PRAGMA foreign_keys = ON")
@@ -211,7 +211,6 @@ def init_database():
     _seed_default_data(cur)
     
     conn.commit()
-    conn.close()
     logger.info("تم تهيئة قاعدة البيانات بنجاح")
 
 
